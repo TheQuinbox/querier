@@ -13,4 +13,6 @@ class SpellingCheckerService(BaseService):
 			for suggestion in spell.candidates(word):
 				ret += suggestion + "\n"
 			ret += "\n"
+		if ret == "":
+			ret += "No suggestions found.\n"
 		return ret
