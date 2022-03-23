@@ -1,6 +1,7 @@
 import wx
 import app
 import services
+import threading
 
 class MainWindow(wx.Frame):
 	def __init__(self):
@@ -48,6 +49,9 @@ class MainWindow(wx.Frame):
 		app.quit()
 	
 	def on_text_enter(self, event):
+		threading.Thread(target=self.run_service).start()
+	
+	def run_service(self):
 		results = services.supported_services[self.service_list.GetSelection()].get_results(self.query.GetValue())
 		self.results.SetValue(results)
 		wx.CallAfter(self.results.SetFocus)
