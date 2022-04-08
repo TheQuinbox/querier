@@ -5,8 +5,11 @@ import threading
 
 class MainWindow(forms.Frame):
 	service_list = fields.ListBox(label="&Services")
-	query = fields.Text(label="&Query", process_enter=True)
+	query = fields.Text(label="&Query", process_enter=True, focus=True)
 	results = fields.Text(label="&Results", multiline=True, read_only=True)
+	
+	def __init__(self, *args, **kwargs):
+		super().__init__(size=(800, 600), *args, **kwargs)
 	
 	def render(self, *args, **kwargs):
 		super().render(*args, **kwargs)
