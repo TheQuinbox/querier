@@ -12,7 +12,10 @@ class MainWindow(forms.Frame):
 		super().render(*args, **kwargs)
 		if services.supported_services == []:
 			return
-		self.service_list.set_value(services.supported_services)
+		service_list = []
+		for service in services.supported_services:
+			service_list.append(service.name)
+		self.service_list.set_value(service_list)
 		self.service_list.set_index(0)
 	
 	@query.add_callback
