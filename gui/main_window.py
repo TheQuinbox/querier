@@ -4,16 +4,13 @@ import services
 import threading
 import wx
 
-class MainWindow(forms.Frame):
-	service_list = fields.ListBox(label="&Services")
-	query = fields.Text(label="&Query", process_enter=True, default_focus=True)
+class MainPanel(forms.Panel):
+	service_list = fields.ListBox(label="&Services", default_focus=True)
+	query = fields.Text(label="&Query", process_enter=True)
 	results = fields.Text(label="&Results", multiline=True, read_only=True)
 	
-	def __init__(self, *args, **kwargs):
-		super().__init__(size=(800, 600), *args, **kwargs)
-	
 	def render(self, *args, **kwargs):
-		super().render(*args, **kwargs)
+		super(forms.Panel, self).render(*args, **kwargs)
 		if services.supported_services == []:
 			return
 		service_list = []
@@ -30,6 +27,9 @@ class MainWindow(forms.Frame):
 		results = services.supported_services[self.service_list.get_index()].get_results(self.query.get_value())
 		self.results.set_value(results)
 		wx.CallAfter(self.results.set_focus)
+
+class MainWindow(forms.Frame):
+	panel = MainPanel()
 	
 	extra_callbacks = (
 		("close", app.exit),
