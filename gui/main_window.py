@@ -1,57 +1,36 @@
-import wx
+from gui_builder import fields, forms
 import app
 import services
 import threading
+import wx
 
-class MainWindow(wx.Frame):
-	def __init__(self):
-		wx.Frame.__init__(self, None, title=f"{app.name} {app.version}")
-		self.init_ui()
-		self.bind_events()
-		self.populate_services()
+class MainPanel(forms.Panel):
+	service_list = fields.ListBox(label="&Services", default_focus=True)
+	query = fields.Text(label="&Query", process_enter=True)
+	results = fields.Text(label="&Results", multiline=True, read_only=True)
 	
-	def init_ui(self):
-		self.panel = wx.Panel(self)
-		self.main_sizer = wx.BoxSizer(wx.VERTICAL)
-		service_sizer = wx.BoxSizer(wx.HORIZONTAL)
-		label = wx.StaticText(self.panel, label="Services")
-		self.service_list = wx.ListBox(self.panel)
-		service_sizer.Add(label, 0, wx.ALL, 5)
-		service_sizer.Add(self.service_list, 0, wx.ALL, 5)
-		query_sizer = wx.BoxSizer(wx.HORIZONTAL)
-		label = wx.StaticText(self.panel, label="&Query")
-		self.query = wx.TextCtrl(self.panel, style=wx.TE_PROCESS_ENTER)
-		query_sizer.Add(label, 0, wx.ALL, 5)
-		query_sizer.Add(self.query, 0, wx.ALL, 5)
-		result_sizer = wx.BoxSizer(wx.HORIZONTAL)
-		label = wx.StaticText(self.panel, label="&results")
-		self.results = wx.TextCtrl(self.panel, style=wx.TE_MULTILINE | wx.TE_READONLY | wx.TE_DONTWRAP)
-		result_sizer.Add(label, 0, wx.ALL, 5)
-		result_sizer.Add(self.results, 0, wx.ALL, 5)
-		self.main_sizer.Add(service_sizer)
-		self.main_sizer.Add(query_sizer)
-		self.main_sizer.Add(result_sizer)
-		self.panel.SetSizerAndFit(self.main_sizer)
-		self.panel.Layout()
-	
-	def bind_events(self):
-		self.Bind(wx.EVT_CLOSE, self.on_exit)
-		self.query.Bind(wx.EVT_TEXT_ENTER, self.on_text_enter)
-	
-	def populate_services(self):
+	def render(self, *args, **kwargs):
+		super(forms.Panel, self).render(*args, **kwargs)
 		if services.supported_services == []:
 			return
-		for i in services.supported_services:
-			self.service_list.Insert(i.name, self.service_list.GetCount())
-		self.service_list.SetSelection(0)
+		service_list = []
+		for service in services.supported_services:
+			service_list.append(service.name)
+		self.service_list.set_value(service_list)
+		self.service_list.set_index(0)
 	
-	def on_exit(self, event):
-		app.quit()
-	
-	def on_text_enter(self, event):
+	@query.add_callback("text_enter")
+	def do_query(self):
 		threading.Thread(target=self.run_service).start()
 	
 	def run_service(self):
-		results = services.supported_services[self.service_list.GetSelection()].get_results(self.query.GetValue())
-		self.results.SetValue(results)
-		wx.CallAfter(self.results.SetFocus)
+		results = services.supported_services[self.service_list.get_index()].get_results(self.query.get_value())
+		self.results.set_value(results)
+		wx.CallAfter(self.results.set_focus)
+
+class MainWindow(forms.Frame):
+	panel = MainPanel()
+	
+	extra_callbacks = (
+		("close", app.exit),
+	)

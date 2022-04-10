@@ -9,6 +9,6 @@ def init():
 	global app
 	app = wx.App()
 
-def quit():
+def exit():
 	app.ExitMainLoop()
 	sys.exit()
