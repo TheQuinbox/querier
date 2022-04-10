@@ -13,9 +13,7 @@ class MainPanel(forms.Panel):
 		super(forms.Panel, self).render(*args, **kwargs)
 		if services.supported_services == []:
 			return
-		service_list = []
-		for service in services.supported_services:
-			service_list.append(service.name)
+		service_list = [service.name for service in services.supported_services]
 		self.service_list.set_value(service_list)
 		self.service_list.set_index(0)
 	
